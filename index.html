@@ -1,0 +1,543 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3D Birthday Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&family=Pacifico&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    font-family: Poppins, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #3a1c71, #d76d77, #ffaf7b);
+    min-height: 100vh;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hidden { display: none; }
+
+.screen {
+    width:100%;
+    max-width: 900px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 2;
+}
+
+/* Buttons */
+button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    font-size: 16px;
+    cursor: pointer;
+    margin: 10px;
+    transition: 0.3s;
+}
+button:hover { transform: scale(1.05); }
+
+/* Login */
+#loginScreen {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+}
+#loginScreen img {
+    width: 120px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+input {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    width: 200px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* 3D Card */
+.card-container {
+    perspective: 2000px;
+    display: inline-block;
+}
+.card {
+    width: 360px;
+    height: 210px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+}
+.card.open { transform: rotateY(180deg); }
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.card-front { background: linear-gradient(155deg, #232526, #414345); }
+.card-front img { width: 80px; }
+
+.card-back {
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    color: #222;
+    transform: rotateY(180deg);
+}
+.card-back h1 {
+    font-family: Pacifico, cursive;
+    color: #d6336c;
+}
+
+/* Sparkles */
+.sparkle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px white;
+    animation: twinkle 2s infinite ease-in-out;
+    z-index: 1;
+}
+@keyframes twinkle {
+    0%,100% { opacity: 0.2; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Flowers */
+.flowers {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.flower-card {
+    background: rgba(255,255,255,0.2);
+    border-radius: 15px;
+    padding: 15px;
+    width: 160px;
+    transition: 0.3s;
+}
+.flower-card:hover {
+    transform: translateY(-10px) scale(1.05);
+}
+.flower-card img {
+    width: 120px;
+    border-radius: 10px;
+}
+
+/* Cake (more realistic) */
+.cake-area {
+    margin: 30px auto;
+    width: 220px;
+    position: relative;
+}
+.plate {
+    width: 240px;
+    height: 20px;
+    background: #ddd;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+.cake {
+    width: 200px;
+    margin: 0 auto;
+}
+.layer {
+    height: 50px;
+    border-radius: 10px;
+    margin: 0;
+    opacity: 0;
+    transition: 0.5s;
+}
+.layer1 { background: linear-gradient(#ff9a9e, #ff6f91); }
+.layer2 { background: linear-gradient(#fad0c4, #f8a1b2); }
+.layer3 { background: linear-gradient(#fbc2eb, #a18cd1); }
+
+.icing {
+    height: 15px;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+    opacity: 0;
+    transition: 0.5s;
+}
+
+/* Candles */
+.candles {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 5px;
+    opacity: 0;
+    transition: 0.5s;
+}
+.candle {
+    width: 10px;
+    height: 40px;
+    background: repeating-linear-gradient(
+        45deg,
+        #ff6f91,
+        #ff6f91 4px,
+        #fff 4px,
+        #fff 8px
+    );
+    position: relative;
+    border-radius: 5px;
+}
+.flame {
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, yellow, orange, red);
+    border-radius: 50%;
+    position: absolute;
+    top: -12px;
+    left: -1px;
+    animation: flicker 0.3s infinite alternate;
+}
+@keyframes flicker {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+/* Gifts */
+.gifts {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.gifts img {
+    width: 150px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+.gifts img:hover {
+    transform: scale(1.1);
+}
+
+/* Confetti + Fireworks */
+.confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    animation: fall 4s linear infinite;
+    z-index: 1;
+}
+@keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
+}
+
+.firework {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: yellow;
+    border-radius: 50%;
+    animation: explode 1.5s ease-out forwards;
+    z-index: 1;
+}
+@keyframes explode {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(20); opacity: 0; }
+}
+
+/* ❤HEART GAME STYLES (INSERTED) */
+#heartGameArea{
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+.heart{
+    position: absolute;
+    font-size: 32px;
+    cursor: pointer;
+    animation: floatUp 4s linear forwards;
+}
+@keyframes floatUp{
+    from{ transform: translateY(320px); opacity:0; }
+    to{ transform: translateY(-40px); opacity:1; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginScreen" class="screen">
+    <img src="C:\Users\Admin\Downloads\WhatsApp Image 2026-02-05 at 4.25.29 PM.jpeg">
+    <h1>Welcome</h1>
+    <p>Enter your name (max 6 letters)</p>
+    <input type="text" id="nameInput" maxlength="6" placeholder="Your Name"><br><br>
+    <button onclick="login()">Enter</button>
+</div>
+
+<!-- Start -->
+<div id="startScreen" class="screen hidden">
+    <h2 id="welcomeText"></h2>
+    <button onclick="showCard()">Open Your Card</button><br>
+    <button onclick="stopMusic()">Stop Music</button><br>
+    <button onclick="goLogin()">Back</button>
+</div>
+
+<!-- Card -->
+<div id="cardScreen" class="screen hidden">
+    <h2>Your Greeting Card</h2>
+    <div class="card-container">
+        <div id="card" class="card" onclick="openCard()">
+            <div class="card-face card-front"><img src="C:\Users\Admin\Downloads\WhatsApp Image 2026-02-05 at 4.33.13 PM (1).jpeg">
+                 <h2>For You ,baby</h2>
+                <p>Click to open</p>
+            </div>
+            <div class="card-face card-back">
+                <h1>Happy Birthday!</h1>
+                <h id="nameText"></h>
+                <p>Wishing you success & happiness<b>hope 
+              you like it  am proud of you<b></p>
+            </div>
+        </div>
+    </div>
+    <br>
+    <button onclick="showFlowers()">Next ➡</button>
+    <button onclick="showStart()">Back</button>
+</div>
+
+<!-- Flowers -->
+<div id="flowerScreen" class="screen hidden">
+    <h2>Flowers for,a big flower </h2>
+    <div class="flowers">
+        <div class="flower-card"><img src="C:\WhatsApp Image 2026-02-05 at 4.25.30 PM (1).jpeg"><p><b><h2>blackRose</p></h2></b></div>
+        <div class="flower-card"><img src="C:\WhatsApp Image 2026-02-05 at 4.25.31 PM (3).jpeg"><p><b><h2>plumeria</h2></b></p></div>
+        <div class="flower-card"><img src="C:\WhatsApp Image 2026-02-05 at 4.25.31 PM (2).jpeg"><p><h2><b>red roses</h2></b></p></div>
+    </div>
+    <br>
+    <button onclick="showCake()">Next➡</button>
+    <button onclick="showCard()">Back</button>
+</div>
+
+<!-- Cake -->
+<div id="cakeScreen" class="screen hidden">
+    <h2>Build Your Cake </h2>
+    <div class="candles" id="candles">
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+        <div class="candle"><div class="flame"></div></div>
+    </div>
+
+    <div class="cake-area">
+        <div class="cake">
+            <div class="layer layer3" id="l3"></div>
+            <div class="icing" id="i3"></div>
+            <div class="layer layer2" id="l2"></div>
+            <div class="icing" id="i2"></div>
+            <div class="layer layer1" id="l1"></div>
+            <div class="icing" id="i1"></div>
+        </div>
+        <div class="plate"></div>
+    </div>
+
+    <button onclick="buildCake()"> Build Cake</button>
+    <button onclick="showHeartGame()">Play Heart Game ❤️</button>
+    <button onclick="blowCandles()">Blow Candles</button><br>
+    <button onclick="showFlowers()"> Back</button>
+</div>
+
+<!-- ❤ HEART GAME SCREEN (INSERTED) -->
+<div id="heartGameScreen" class="screen hidden">
+    <h2>❤ Heart Catch Game ❤</h2>
+    <p>Catch 10 hearts to unlock your gift 🎁</p>
+    <p>Score: <span id="heartScore">0</span> / 10</p>
+    <div id="heartGameArea"></div>
+    <br>
+    <button onclick="showCake()">Back</button>
+</div>
+
+<!-- Gifts -->
+<div id="giftScreen" class="screen hidden">
+    <h2>Your Gifts</h2>
+    <div class="gifts">
+        <div class="gift-item">
+            <img src="C:\WhatsApp Image 2026-02-05 at 4.25.31 PM (1).jpeg">
+            <p><b>Hug </b></p>
+        </div>
+
+        <div class="gift-item">
+            <img src="C:\WhatsApp Image 2026-02-05 at 4.25.31 PM.jpeg">
+            <p><b>Nap Kiss </b></p>
+        </div>
+
+        <div class="gift-item">
+            <img src="C:\WhatsApp Image 2026-02-05 at 4.25.32 PM.jpeg">
+            <p><b>Staring </b></p>
+        </div>
+    </div>
+    <br>
+    <button onclick="showCake()">Back</button>
+</div>
+
+<!-- Music -->
+<audio id="music" src="C:\Users\Admin\Downloads\WhatsApp Audio 2026-02-05 at 4.15.19 PM.mp4" loop></audio>
+
+<script>
+let userName = "";
+const music = document.getElementById("music");
+
+/* ❤ HEART GAME VARS */
+let heartScore = 0;
+let heartInterval;
+
+function login() {
+    const input = document.getElementById("nameInput").value.trim();
+    if (input.length === 0) return alert("Enter name");
+    userName = input;
+    document.getElementById("welcomeText").innerText = "Welcome, " + userName + " 🎉";
+    document.getElementById("nameText").innerText = "Dear " + userName + ",";
+    music.play();
+    showStart();
+}
+
+function stopMusic() { music.pause(); }
+
+function goLogin(){ hideAll(); loginScreen.classList.remove("hidden"); }
+
+function showStart(){ hideAll(); startScreen.classList.remove("hidden"); }
+function showCard(){ hideAll(); cardScreen.classList.remove("hidden"); }
+function showFlowers(){ hideAll(); flowerScreen.classList.remove("hidden"); }
+function showCake(){ hideAll(); cakeScreen.classList.remove("hidden"); }
+function showGifts(){ hideAll(); giftScreen.classList.remove("hidden"); }
+
+/* ❤ SHOW HEART GAME */
+function showHeartGame(){
+    hideAll();
+    heartGameScreen.classList.remove("hidden");
+    startHeartGame();
+}
+
+function hideAll(){
+    loginScreen.classList.add("hidden");
+    startScreen.classList.add("hidden");
+    cardScreen.classList.add("hidden");
+    flowerScreen.classList.add("hidden");
+    cakeScreen.classList.add("hidden");
+    giftScreen.classList.add("hidden");
+    heartGameScreen.classList.add("hidden");
+}
+
+function openCard(){
+    document.getElementById("card").classList.toggle("open");
+    createSparkles();
+}
+
+function createSparkles(){
+    for(let i=0;i<50;i++){
+        const s=document.createElement("div");
+        s.className="sparkle";
+        s.style.left=Math.random()*100+"vw";
+        s.style.top=Math.random()*100+"vh";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),4000);
+    }
+}
+
+function buildCake(){
+    document.getElementById("l1").style.opacity = 1;
+    document.getElementById("i1").style.opacity = 1;
+    setTimeout(()=>{
+        document.getElementById("l2").style.opacity = 1;
+        document.getElementById("i2").style.opacity = 1;
+    },500);
+    setTimeout(()=>{
+        document.getElementById("l3").style.opacity = 1;
+        document.getElementById("i3").style.opacity = 1;
+    },1000);
+    setTimeout(()=>document.getElementById("candles").style.opacity = 1, 1200);
+}
+
+function blowCandles(){
+    document.querySelectorAll(".flame").forEach(f => f.style.display = "none");
+    startConfetti();
+    startFireworks();
+    setTimeout(showGifts, 2000);
+}
+
+function startConfetti(){
+    for(let i=0;i<200;i++){
+        const c=document.createElement("div");
+        c.className="confetti";
+        c.style.left=Math.random()*100+"vw";
+        c.style.background="hsl("+Math.random()*360+",100%,50%)";
+        c.style.animationDuration=(2+Math.random()*3)+"s";
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),6000);
+    }
+}
+
+function startFireworks(){
+    for(let i=0;i<20;i++){
+        const f=document.createElement("div");
+        f.className="firework";
+        f.style.left=Math.random()*100+"vw";
+        f.style.top=Math.random()*50+"vh";
+        f.style.background="hsl("+Math.random()*360+",100%,50%)";
+        document.body.appendChild(f);
+        setTimeout(()=>f.remove(),1500);
+    }
+}
+
+/* ❤ HEART GAME LOGIC (INSERTED) */
+function startHeartGame(){
+    heartScore = 0;
+    document.getElementById("heartScore").innerText = heartScore;
+    const area = document.getElementById("heartGameArea");
+    area.innerHTML = "";
+    clearInterval(heartInterval);
+    heartInterval = setInterval(createHeart, 800);
+}
+
+function createHeart(){
+    const area = document.getElementById("heartGameArea");
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = "❤";
+    heart.style.left = Math.random() * 90 + "%";
+
+    heart.onclick = () => {
+        heart.remove();
+        heartScore++;
+        document.getElementById("heartScore").innerText = heartScore;
+
+        if(heartScore >= 10){
+            clearInterval(heartInterval);
+            setTimeout(()=>{
+                alert("🎉 You won! Gifts unlocked!");
+                showGifts();
+            },300);
+        }
+    };
+
+    area.appendChild(heart);
+    setTimeout(()=>heart.remove(), 4000);
+}
+</script>
+</body>
+</html>
+
